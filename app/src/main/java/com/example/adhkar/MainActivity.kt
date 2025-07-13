@@ -304,6 +304,7 @@ fun AdhkarApp( modifier: Modifier = Modifier) {
                             } else {
                                 currentState = 0
                                 morningOrEvening = 0
+                                dhirkCount = dhikrList[0].initialCount
                             }
                         },
                         previousDhikrOnClick = {
