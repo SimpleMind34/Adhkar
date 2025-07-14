@@ -1,5 +1,6 @@
 package com.example.adhkar
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
@@ -25,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,11 +82,11 @@ fun Dhikr(modifier: Modifier = Modifier,
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. Flexible content area (text)
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f), // This takes all remaining vertical space
+                .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -92,28 +97,41 @@ fun Dhikr(modifier: Modifier = Modifier,
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(dhikr),
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 36.sp,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(dhikr),
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 36.sp,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(dhikrResource),
-                        fontSize = 25.sp,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 32.sp,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(dhikrResource),
+                            fontSize = 25.sp,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 32.sp
+                        )
+                    }
+
                 }
             }
         }
 
-        // 2. Buttons fixed at bottom
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -161,6 +179,8 @@ fun Dhikr(modifier: Modifier = Modifier,
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun AdhkarApp( modifier: Modifier = Modifier) {
     val sharedList = listOf(
@@ -190,9 +210,9 @@ fun AdhkarApp( modifier: Modifier = Modifier) {
     )
 
 
-    var currentState by remember { mutableIntStateOf(0) }
-    var dhirkCount by remember { mutableIntStateOf(1) }
-    var morningOrEvening by remember { mutableIntStateOf(0) }
+    var currentState by rememberSaveable { mutableIntStateOf(0) }
+    var dhirkCount by rememberSaveable { mutableIntStateOf(1) }
+    var morningOrEvening by rememberSaveable { mutableIntStateOf(0) }
 
     val dhikrList = when (morningOrEvening) {
         0 -> sharedList + morningOnlyList
@@ -204,11 +224,11 @@ fun AdhkarApp( modifier: Modifier = Modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Centered content
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
@@ -217,12 +237,17 @@ fun AdhkarApp( modifier: Modifier = Modifier) {
                     .weight(1f)
             ) {
                 Text(
-                    text = "اختر نوع الأذكار",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1976D2), // consistent blue
-                    modifier = Modifier.padding(bottom = 32.dp)
+                    text = " {وَاذْكُرِ ٱسْمَ رَبِّكَ بُكْرَةً وَأَصِيلًا} " ,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB8860B),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 36.sp,
+                    modifier = Modifier
+                        .padding(vertical = 24.dp)
+                        .fillMaxWidth()
                 )
+
 
                 Button(
                     onClick = {
@@ -277,9 +302,34 @@ fun AdhkarApp( modifier: Modifier = Modifier) {
         }
 
     } else {
-        val index = currentState - 1
-        if (index < dhikrList.size) {
-            val item = dhikrList[index]
+        Scaffold(
+            topBar = {
+                if (currentState != 0) {
+                    androidx.compose.material3.TopAppBar(
+                        title = { Text("الرجوع") },
+                        navigationIcon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
+                                contentDescription = "رجوع",
+                                modifier = Modifier
+                                    .clickable {
+                                        currentState = 0
+                                        morningOrEvening = 0
+                                        dhirkCount = 1
+                                    }
+                                    .padding(16.dp)
+                            )
+                        }
+                    )
+                }
+            }
+        ) { innerPadding ->
+            // Main content goes here
+            Box(modifier = Modifier.padding(innerPadding)) {
+                // your Dhikr composable, etc.
+                val index = currentState - 1
+                if (index < dhikrList.size) {
+                    val item = dhikrList[index]
                     Dhikr(
                         modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center),
                         dhikr = item.textId,
@@ -301,10 +351,12 @@ fun AdhkarApp( modifier: Modifier = Modifier) {
                             if (index + 1 < dhikrList.size) {
                                 dhirkCount = dhikrList[index + 1].initialCount
                                 currentState++
-                            } else {
+                            } else if (dhikrList.isNotEmpty()) {
                                 currentState = 0
                                 morningOrEvening = 0
+                                dhirkCount = dhikrList[0].initialCount
                             }
+
                         },
                         previousDhikrOnClick = {
                             if (index > 0) {
@@ -320,10 +372,8 @@ fun AdhkarApp( modifier: Modifier = Modifier) {
         }
 
 
-
-
-
-
+            }
+        }
 
 @Preview(showBackground = true)
 @Composable
